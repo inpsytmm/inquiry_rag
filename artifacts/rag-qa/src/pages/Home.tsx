@@ -9,7 +9,7 @@ import {
   Info,
   ChevronRight,
   AlertCircle,
-  Briefcase
+  Briefcase,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export default function Home() {
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!question.trim() || askMutation.isPending) return;
-    
+
     askMutation.mutate({ data: { question: question.trim() } });
   };
 
@@ -69,12 +69,13 @@ export default function Home() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
             <Briefcase className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">사내 1:1 문의 데이터 기반 AI</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+            인싸이트 마케팅운영 지식엔진
+          </h1>
         </div>
       </header>
 
       <main className="flex-1 w-full max-w-4xl mx-auto px-4 py-12 sm:py-16 flex flex-col gap-8 z-10">
-        
         {/* Hero Section */}
         <section className="text-center space-y-4 mb-4">
           <motion.div
@@ -82,21 +83,25 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm font-medium">
+            <Badge
+              variant="secondary"
+              className="mb-4 bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm font-medium"
+            >
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              RAG 모델 베타서비스입니다. (최근 1개월 문의 데이터 벡터화 완료)
+              v1.0 최근 1개월 1:1 문의 데이터 벡터화 완료
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
               무엇이든 물어보세요.
             </h2>
             <p className="mt-4 text-base sm:text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-              사내 1:1 문의 데이터를 기반으로 <br className="hidden sm:block" />가장 적합한 답변을 즉시 제공합니다.
+              사내 1:1 문의 데이터를 기반으로 <br className="hidden sm:block" />
+              가장 적합한 답변을 즉시 제공합니다.
             </p>
           </motion.div>
         </section>
 
         {/* Input Section */}
-        <motion.section 
+        <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
@@ -183,9 +188,12 @@ export default function Home() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-6 h-6 text-red-500 mt-0.5" />
                   <div>
-                    <h3 className="text-lg font-bold text-red-800">오류가 발생했습니다</h3>
+                    <h3 className="text-lg font-bold text-red-800">
+                      오류가 발생했습니다
+                    </h3>
                     <p className="text-red-600 mt-1">
-                      요청을 처리하는 도중 문제가 발생했습니다. 잠시 후 다시 시도해주세요.
+                      요청을 처리하는 도중 문제가 발생했습니다. 잠시 후 다시
+                      시도해주세요.
                     </p>
                   </div>
                 </div>
@@ -209,12 +217,16 @@ export default function Home() {
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shrink-0 shadow-md shadow-primary/20">
                       <Bot className="w-5 h-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">AI 답변</h3>
+                    <h3 className="text-xl font-bold text-slate-900 tracking-tight">
+                      AI 답변
+                    </h3>
                   </div>
                 </div>
-                
+
                 <div className="prose prose-slate max-w-none prose-p:leading-relaxed prose-p:text-slate-700">
-                  <p className="whitespace-pre-wrap text-base sm:text-lg">{data.answer}</p>
+                  <p className="whitespace-pre-wrap text-base sm:text-lg">
+                    {data.answer}
+                  </p>
                 </div>
               </Card>
 
@@ -226,22 +238,27 @@ export default function Home() {
                       <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-slate-50 transition-colors [&[data-state=open]>div>svg]:rotate-90">
                         <div className="flex items-center gap-2 text-slate-700">
                           <Database className="w-4 h-4 text-primary" />
-                          <span className="font-semibold text-base">참고 문서 ({data.chunks.length}건)</span>
+                          <span className="font-semibold text-base">
+                            참고 문서 ({data.chunks.length}건)
+                          </span>
                           <ChevronRight className="w-4 h-4 ml-auto text-slate-400 transition-transform duration-200" />
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="px-6 pb-6 pt-2">
                         <div className="flex flex-col gap-4">
                           {data.chunks.map((chunk, idx) => (
-                            <motion.div 
+                            <motion.div
                               initial={{ opacity: 0, y: 10 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: idx * 0.1 }}
-                              key={chunk.id} 
+                              key={chunk.id}
                               className="group relative rounded-xl border border-border/60 bg-slate-50/50 p-4 hover:bg-slate-50 transition-colors"
                             >
                               <div className="flex items-center justify-between mb-3">
-                                <Badge variant="outline" className="bg-white text-slate-600 font-mono text-xs border-slate-200">
+                                <Badge
+                                  variant="outline"
+                                  className="bg-white text-slate-600 font-mono text-xs border-slate-200"
+                                >
                                   Doc ID: {chunk.id.substring(0, 8)}...
                                 </Badge>
                                 <Badge className="bg-blue-100 hover:bg-blue-200 text-blue-700 border-none px-2 py-0.5 text-xs font-semibold">
