@@ -36,13 +36,16 @@ const openai = new OpenAI({
 
 // ──────────────────────────────────────────────
 // PostgreSQL(Neon) 연결 풀
-// DATABASE_URL 환경변수를 사용합니다.
+// NEON_DATABASE_URL 환경변수를 사용합니다.
 // ──────────────────────────────────────────────
+const dbUrl = process.env.NEON_DATABASE_URL;
+if (!dbUrl) {
+  throw new Error("NEON_DATABASE_URL 환경변수가 설정되지 않았습니다.");
+}
+
 const pool = new pg.Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL?.includes("neon.tech")
-    ? { rejectUnauthorized: false }
-    : false,
+  connectionString: dbUrl,
+  ssl: { rejectUnauthorized: false },
 });
 
 // ──────────────────────────────────────────────
