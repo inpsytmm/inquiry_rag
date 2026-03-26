@@ -10,10 +10,10 @@ const router: IRouter = Router();
 // ──────────────────────────────────────────────
 
 /** pgvector 임베딩이 저장된 테이블명 */
-const TABLE_NAME = "documents";
+const TABLE_NAME = "inquiry_case_ai_chunks";
 
 /** 텍스트(원문) 컬럼명 */
-const TEXT_COLUMN = "content";
+const TEXT_COLUMN = "chunk_text";
 
 /** 임베딩 벡터 컬럼명 */
 const EMBEDDING_COLUMN = "embedding";
@@ -71,17 +71,20 @@ router.post("/ask", async (req, res) => {
     const questionEmbedding = embeddingResponse.data[0].embedding;
 
     // 3. pgvector 코사인 유사도로 유사한 문서 TOP_K개 검색
+    //    inquiry_case_ai_chunk_embeddings 테이블의 embedding과
+    //    inquiry_case_ai_chunks 테이블의 chunk_text를 JOIN하여 검색합니다.
     //    <=> 연산자: cosine distance (값이 작을수록 유사)
     //    1 - distance = similarity (값이 클수록 유사)
     req.log.info("pgvector 유사 문서 검색 시작");
     const vectorStr = `[${questionEmbedding.join(",")}]`;
     const searchQuery = `
       SELECT
-        id::text AS id,
-        ${TEXT_COLUMN} AS content,
-        1 - (${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
-      FROM ${TABLE_NAME}
-      ORDER BY ${EMBEDDING_COLUMN} <=> $1::vector
+        c.id::text AS id,
+        c.${TEXT_COLUMN} AS content,
+        1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
+      FROM ${TABLE_NAME} c
+      JOIN inquiry_case_ai_chunk_embeddings e ON e.chunk_id = c.id
+      ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
       LIMIT ${TOP_K}
     `;
     const dbResult = await pool.query(searchQuery, [vectorStr]);
