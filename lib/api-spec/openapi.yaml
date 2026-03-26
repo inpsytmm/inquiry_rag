@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: rag
+    description: RAG Q&A operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /ask:
+    post:
+      operationId: ask
+      tags: [rag]
+      summary: RAG 기반 질문 답변
+      description: 질문을 받아 pgvector 유사 검색 후 LLM으로 답변 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskRequest"
+      responses:
+        "200":
+          description: 답변 생성 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskResponse"
+        "400":
+          description: 잘못된 요청
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: 서버 오류
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +66,49 @@ components:
           type: string
       required:
         - status
-
+    AskRequest:
+      type: object
+      properties:
+        question:
+          type: string
+          description: 사용자가 입력한 질문
+      required:
+        - question
+    RetrievedChunk:
+      type: object
+      properties:
+        id:
+          type: string
+          description: 문서 ID
+        content:
+          type: string
+          description: 검색된 원문 텍스트
+        similarity:
+          type: number
+          description: 유사도 점수
+      required:
+        - id
+        - content
+        - similarity
+    AskResponse:
+      type: object
+      properties:
+        answer:
+          type: string
+          description: LLM이 생성한 최종 답변
+        chunks:
+          type: array
+          items:
+            $ref: "#/components/schemas/RetrievedChunk"
+          description: 검색된 유사 문서 목록 (디버깅용)
+      required:
+        - answer
+        - chunks
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: 오류 메시지
+      required:
+        - error

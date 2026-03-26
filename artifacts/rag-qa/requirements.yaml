@@ -1,0 +1,10 @@
+packages:
+  "framer-motion": "Smooth entry animations and loading state transitions for the AI response"
+  "lucide-react": "High-quality vector icons for the UI"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to safely merge Tailwind classes without style conflicts"
+
+notes:
+  - "The app assumes a single-page architecture at the root path."
+  - "React Query hooks and types are imported directly from the generated @workspace/api-client-react package."
+  - "Using Noto Sans KR for body text and Gothic A1 for headings to match a modern Korean enterprise aesthetic."

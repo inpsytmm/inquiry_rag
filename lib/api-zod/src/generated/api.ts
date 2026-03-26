@@ -14,3 +14,24 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * 질문을 받아 pgvector 유사 검색 후 LLM으로 답변 생성
+ * @summary RAG 기반 질문 답변
+ */
+export const AskBody = zod.object({
+  question: zod.string().describe("사용자가 입력한 질문"),
+});
+
+export const AskResponse = zod.object({
+  answer: zod.string().describe("LLM이 생성한 최종 답변"),
+  chunks: zod
+    .array(
+      zod.object({
+        id: zod.string().describe("문서 ID"),
+        content: zod.string().describe("검색된 원문 텍스트"),
+        similarity: zod.number().describe("유사도 점수"),
+      }),
+    )
+    .describe("검색된 유사 문서 목록 (디버깅용)"),
+});

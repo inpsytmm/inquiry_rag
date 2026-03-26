@@ -8,3 +8,29 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AskRequest {
+  /** 사용자가 입력한 질문 */
+  question: string;
+}
+
+export interface RetrievedChunk {
+  /** 문서 ID */
+  id: string;
+  /** 검색된 원문 텍스트 */
+  content: string;
+  /** 유사도 점수 */
+  similarity: number;
+}
+
+export interface AskResponse {
+  /** LLM이 생성한 최종 답변 */
+  answer: string;
+  /** 검색된 유사 문서 목록 (디버깅용) */
+  chunks: RetrievedChunk[];
+}
+
+export interface ErrorResponse {
+  /** 오류 메시지 */
+  error: string;
+}

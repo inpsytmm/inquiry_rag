@@ -48,6 +48,14 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 - `pnpm run build` — runs `typecheck` first, then recursively runs `build` in all packages that define it
 - `pnpm run typecheck` — runs `tsc --build --emitDeclarationOnly` using project references
 
+## Features
+
+### RAG 기반 문의 검색 AI
+- **프론트엔드**: `artifacts/rag-qa` (React + Vite, 한국어 UI)
+- **백엔드 엔드포인트**: `POST /api/ask`
+- **RAG 흐름**: OpenAI 임베딩 → pgvector 유사 검색 → GPT-4o-mini 답변 생성
+- **수정 포인트**: `artifacts/api-server/src/routes/ask.ts` 상단 상수 (`TABLE_NAME`, `TEXT_COLUMN`, `EMBEDDING_COLUMN`, `TOP_K`)
+
 ## Packages
 
 ### `artifacts/api-server` (`@workspace/api-server`)

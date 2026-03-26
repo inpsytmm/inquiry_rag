@@ -5,18 +5,26 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  AskRequest,
+  AskResponse,
+  ErrorResponse,
+  HealthStatus,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
-import type { ErrorType } from "../custom-fetch";
+import type { ErrorType, BodyType } from "../custom-fetch";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
@@ -99,3 +107,88 @@ export function useHealthCheck<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * 질문을 받아 pgvector 유사 검색 후 LLM으로 답변 생성
+ * @summary RAG 기반 질문 답변
+ */
+export const getAskUrl = () => {
+  return `/api/ask`;
+};
+
+export const ask = async (
+  askRequest: AskRequest,
+  options?: RequestInit,
+): Promise<AskResponse> => {
+  return customFetch<AskResponse>(getAskUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(askRequest),
+  });
+};
+
+export const getAskMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof ask>>,
+    TError,
+    { data: BodyType<AskRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof ask>>,
+  TError,
+  { data: BodyType<AskRequest> },
+  TContext
+> => {
+  const mutationKey = ["ask"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof ask>>,
+    { data: BodyType<AskRequest> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return ask(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AskMutationResult = NonNullable<Awaited<ReturnType<typeof ask>>>;
+export type AskMutationBody = BodyType<AskRequest>;
+export type AskMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary RAG 기반 질문 답변
+ */
+export const useAsk = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof ask>>,
+    TError,
+    { data: BodyType<AskRequest> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof ask>>,
+  TError,
+  { data: BodyType<AskRequest> },
+  TContext
+> => {
+  return useMutation(getAskMutationOptions(options));
+};
