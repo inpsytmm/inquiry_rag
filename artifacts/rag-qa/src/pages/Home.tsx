@@ -69,7 +69,7 @@ export default function Home() {
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-md shadow-primary/20">
             <Briefcase className="w-5 h-5 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight">Enterprise 지식 검색 AI</h1>
+          <h1 className="text-xl font-bold text-slate-900 tracking-tight">사내 1:1 문의 데이터 기반 AI</h1>
         </div>
       </header>
 
@@ -84,13 +84,13 @@ export default function Home() {
           >
             <Badge variant="secondary" className="mb-4 bg-primary/10 text-primary border-primary/20 px-3 py-1 text-sm font-medium">
               <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-              사내 규정 및 가이드라인 특화
+              RAG 모델 베타서비스입니다. (최근 1개월 문의 데이터 벡터화 완료)
             </Badge>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
               무엇이든 물어보세요.
             </h2>
             <p className="mt-4 text-base sm:text-lg text-slate-500 max-w-2xl mx-auto font-medium">
-              수천 건의 사내 문서와 규정 데이터를 바탕으로 <br className="hidden sm:block" />가장 정확하고 빠른 답변을 제공합니다.
+              사내 1:1 문의 데이터를 기반으로 <br className="hidden sm:block" />가장 적합한 답변을 즉시 제공합니다.
             </p>
           </motion.div>
         </section>
