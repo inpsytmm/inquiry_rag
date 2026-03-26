@@ -84,6 +84,7 @@ router.post("/ask", async (req, res) => {
         1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
       FROM ${TABLE_NAME} c
       JOIN inquiry_case_ai_chunk_embeddings e ON e.chunk_id = c.id
+      WHERE c.chunk_type = 'merged'
       ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
       LIMIT ${TOP_K}
     `;
@@ -125,7 +126,8 @@ ${question}
       temperature: 0.3,
     });
 
-    const answer = chatResponse.choices[0]?.message?.content ?? "답변을 생성할 수 없습니다.";
+    const answer =
+      chatResponse.choices[0]?.message?.content ?? "답변을 생성할 수 없습니다.";
 
     req.log.info("RAG 답변 생성 완료");
 
@@ -134,7 +136,9 @@ ${question}
     res.json(response);
   } catch (err) {
     req.log.error({ err }, "RAG 처리 중 오류 발생");
-    res.status(500).json({ error: "답변 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요." });
+    res.status(500).json({
+      error: "답변 생성 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+    });
   }
 });
 
