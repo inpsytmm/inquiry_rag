@@ -22,7 +22,7 @@ const EMBEDDING_COLUMN = "embedding";
 const TOP_K = parseInt(process.env.RAG_TOP_K ?? "5", 10);
 
 /** 유사도 임계값 - 이 값 미만의 청크는 검색 결과에서 제외 */
-const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD ?? "0.45");
+const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD ?? "0.3");
 
 /** OpenAI 임베딩 모델 */
 const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? "text-embedding-3-small";
@@ -79,21 +79,23 @@ router.post("/ask", async (req, res) => {
     //    <=> 연산자: cosine distance (값이 작을수록 유사)
     //    1 - distance = similarity (값이 클수록 유사)
     req.log.info("pgvector 유사 문서 검색 시작");
+
     const vectorStr = `[${questionEmbedding.join(",")}]`;
     const searchQuery = `
-  SELECT
-    c.id::text AS id,
-    c.${TEXT_COLUMN} AS content,
-    1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
-  FROM ${TABLE_NAME} c
-  JOIN inquiry_case_ai_chunk_embeddings e 
-    ON e.chunk_id = c.id
-    AND e.embedding_model = '${EMBEDDING_MODEL}'
-  WHERE c.chunk_type = 'merged'
-    AND 1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) >= ${SIMILARITY_THRESHOLD}
-  ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
-  LIMIT ${TOP_K}
-`;
+      SELECT
+        c.id::text AS id,
+        c.${TEXT_COLUMN} AS content,
+        1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
+      FROM ${TABLE_NAME} c
+      JOIN inquiry_case_ai_chunk_embeddings e
+        ON e.chunk_id = c.id
+        AND e.embedding_model = '${EMBEDDING_MODEL}'
+      WHERE c.chunk_type = 'merged'
+        AND 1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) >= ${SIMILARITY_THRESHOLD}
+      ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
+      LIMIT ${TOP_K}
+    `;
+
     const dbResult = await pool.query(searchQuery, [vectorStr]);
     const chunks = dbResult.rows as Array<{
       id: string;
