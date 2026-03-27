@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { useAsk } from "@workspace/api-client-react";
 import { motion, AnimatePresence } from "framer-motion";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Send,
   Search,
   AlertCircle,
-  ChevronRight,
+  ChevronDown,
   FileText,
   Sparkles,
+  ChevronUp,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -23,6 +26,7 @@ import {
 
 export default function Home() {
   const [question, setQuestion] = useState("");
+  const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -41,7 +45,10 @@ export default function Home() {
     e?.preventDefault();
     if (!question.trim() || askMutation.isPending) return;
 
-    askMutation.mutate({ data: { question: question.trim() } });
+    const trimmed = question.trim();
+    setQuestion("");
+    setExpandedChunks(new Set());
+    askMutation.mutate({ data: { question: trimmed } });
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -49,6 +56,18 @@ export default function Home() {
       e.preventDefault();
       handleSubmit();
     }
+  };
+
+  const toggleChunk = (id: string) => {
+    setExpandedChunks((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
   };
 
   const isPending = askMutation.isPending;
@@ -102,7 +121,11 @@ export default function Home() {
         >
           <Card className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_8px_30px_rgba(15,23,42,0.06)]">
             <form onSubmit={handleSubmit} className="p-3 sm:p-4">
+              <label htmlFor="question-input" className="sr-only">
+                질문 입력
+              </label>
               <Textarea
+                id="question-input"
                 ref={textareaRef}
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
@@ -221,8 +244,10 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="whitespace-pre-wrap text-[15px] leading-7 text-slate-700 sm:text-base">
-                  {data.answer}
+                <div className="prose prose-slate prose-sm sm:prose-base max-w-none prose-p:leading-7 prose-li:leading-7 prose-headings:font-semibold">
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {data.answer}
+                  </ReactMarkdown>
                 </div>
               </Card>
 
@@ -230,7 +255,7 @@ export default function Home() {
                 <Card className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
                   <Accordion type="single" collapsible className="w-full">
                     <AccordionItem value="sources" className="border-none">
-                      <AccordionTrigger className="px-5 py-4 hover:no-underline hover:bg-slate-50 sm:px-6">
+                      <AccordionTrigger className="group px-5 py-4 hover:no-underline hover:bg-slate-50 sm:px-6">
                         <div className="flex w-full items-center gap-3 text-left">
                           <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-100">
                             <FileText className="h-4 w-4 text-slate-700" />
@@ -245,38 +270,59 @@ export default function Home() {
                             </p>
                           </div>
 
-                          <ChevronRight className="h-4 w-4 text-slate-400 transition-transform duration-200" />
+                          <ChevronDown className="h-4 w-4 text-slate-400 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                         </div>
                       </AccordionTrigger>
 
                       <AccordionContent className="px-5 pb-5 pt-1 sm:px-6 sm:pb-6">
                         <div className="flex flex-col gap-3">
-                          {data.chunks.map((chunk, idx) => (
-                            <motion.div
-                              key={chunk.id}
-                              initial={{ opacity: 0, y: 6 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: idx * 0.05 }}
-                              className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
-                            >
-                              <div className="mb-3 flex items-center justify-between gap-3">
-                                <Badge
-                                  variant="outline"
-                                  className="rounded-full border-slate-200 bg-white font-mono text-[11px] text-slate-500"
+                          {data.chunks.map((chunk, idx) => {
+                            const isExpanded = expandedChunks.has(chunk.id);
+                            return (
+                              <motion.div
+                                key={chunk.id}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: idx * 0.05 }}
+                                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                              >
+                                <div className="mb-3 flex items-center justify-end gap-3">
+                                  <Badge className="rounded-full border-0 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-900">
+                                    관련도 {Math.round(chunk.similarity * 100)}%
+                                  </Badge>
+                                </div>
+
+                                <p
+                                  className={`text-sm leading-6 text-slate-600 ${
+                                    isExpanded ? "" : "line-clamp-4"
+                                  }`}
                                 >
-                                  Doc ID: {chunk.id.substring(0, 8)}...
-                                </Badge>
+                                  {chunk.content}
+                                </p>
 
-                                <Badge className="rounded-full border-0 bg-slate-900 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-slate-900">
-                                  관련도 {Math.round(chunk.similarity * 100)}%
-                                </Badge>
-                              </div>
-
-                              <p className="line-clamp-4 text-sm leading-6 text-slate-600">
-                                {chunk.content}
-                              </p>
-                            </motion.div>
-                          ))}
+                                {chunk.content.split("\n").length > 4 ||
+                                chunk.content.length > 300 ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleChunk(chunk.id)}
+                                    className="mt-2 flex items-center gap-1 text-xs font-medium text-slate-400 hover:text-slate-600"
+                                  >
+                                    {isExpanded ? (
+                                      <>
+                                        <ChevronUp className="h-3 w-3" />
+                                        접기
+                                      </>
+                                    ) : (
+                                      <>
+                                        <ChevronDown className="h-3 w-3" />
+                                        전체 보기
+                                      </>
+                                    )}
+                                  </button>
+                                ) : null}
+                              </motion.div>
+                            );
+                          })}
                         </div>
                       </AccordionContent>
                     </AccordionItem>

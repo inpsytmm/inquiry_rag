@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add:*)",
+      "Bash(echo \"PATH: $PATH\")",
+      "Read(//c/Users/user/AppData/Local/**)",
+      "Read(//c/Users/user/AppData/Roaming/**)",
+      "Bash(node \"/c/Program Files/nodejs/node_modules/corepack/dist/pnpm.js\" --version)",
+      "Bash(node \"/c/Program Files/nodejs/node_modules/corepack/dist/pnpm.js\" add react-markdown remark-gfm)",
+      "Bash(pnpm install:*)",
+      "Bash(cmd /c \"pnpm install\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag''; pnpm install\")",
+      "Bash(powershell -Command \"Get-Command pnpm -ErrorAction SilentlyContinue; where.exe pnpm 2>&1; npm list -g pnpm 2>&1 | head -5\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\user'' -Recurse -Name ''pnpm.cmd'' -ErrorAction SilentlyContinue | Select-Object -First 5\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path ''C:\\\\Users\\\\user\\\\AppData\\\\Local'' -Recurse -Filter ''pnpm*'' -ErrorAction SilentlyContinue | Select-Object -First 10 FullName\")",
+      "Bash(powershell -Command \"& ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\pnpm\\\\pnpm.exe'' install --dir ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag''\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\pnpm'' | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\node\\\\corepack\\\\v1\\\\pnpm'' | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\node\\\\corepack\\\\v1\\\\pnpm\\\\10.33.0'' | Select-Object Name\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag''; node ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\node\\\\corepack\\\\v1\\\\pnpm\\\\10.33.0\\\\bin\\\\pnpm.cjs'' install\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag''; [System.Environment]::SetEnvironmentVariable\\(''CI'', ''true''\\); node ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\node\\\\corepack\\\\v1\\\\pnpm\\\\10.33.0\\\\bin\\\\pnpm.cjs'' install\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag''; [System.Environment]::SetEnvironmentVariable\\(''CI'', ''true''\\); node ''C:\\\\Users\\\\user\\\\AppData\\\\Local\\\\node\\\\corepack\\\\v1\\\\pnpm\\\\10.33.0\\\\bin\\\\pnpm.cjs'' install --no-frozen-lockfile\")",
+      "Bash(powershell -Command \"Test-Path ''C:\\\\Users\\\\user\\\\Desktop\\\\프로젝트\\\\RAG관련\\\\inquiry_rag\\\\artifacts\\\\api-server\\\\.env''\")"
+    ]
+  }
+}

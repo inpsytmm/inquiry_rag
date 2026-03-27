@@ -19,13 +19,13 @@ const TEXT_COLUMN = "chunk_text";
 const EMBEDDING_COLUMN = "embedding";
 
 /** 유사도 검색 시 반환할 최대 문서 수 */
-const TOP_K = 5;
+const TOP_K = parseInt(process.env.RAG_TOP_K ?? "5", 10);
 
 /** OpenAI 임베딩 모델 */
-const EMBEDDING_MODEL = "text-embedding-3-small";
+const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? "text-embedding-3-small";
 
 /** OpenAI 답변 생성 모델 */
-const CHAT_MODEL = "gpt-4o-mini";
+const CHAT_MODEL = process.env.CHAT_MODEL ?? "gpt-4o-mini";
 
 // ──────────────────────────────────────────────
 // OpenAI 클라이언트 초기화
