@@ -9,7 +9,7 @@ const router: IRouter = Router();
 const TABLE_NAME = "inquiry_case_ai_chunks";
 
 /** 텍스트(원문) 컬럼명 */
-const TEXT_COLUMN = "chunk_text";
+const TEXT_COLUMN = "chunk_text_normalized";
 
 /** 유사도 검색 시 반환할 최대 문서 수 */
 const TOP_K = parseInt(process.env.RAG_TOP_K ?? "15", 10);
@@ -55,20 +55,24 @@ router.post("/ask", async (req, res) => {
     const vectorStr = `[${questionEmbedding.join(",")}]`;
 
     const searchQuery = `
-      SELECT
-        c.id::text AS id,
-        c.${TEXT_COLUMN} AS content,
-        1 - (e.embedding <=> $1::vector) AS similarity
-      FROM ${TABLE_NAME} c
-      JOIN inquiry_case_ai_chunk_embeddings e
-        ON e.chunk_id = c.id
-        AND e.embedding_model = '${EMBEDDING_MODEL}'
-      WHERE c.chunk_type = 'merged'
-      ORDER BY e.embedding <=> $1::vector
-      LIMIT ${TOP_K}
-    `;
+  SELECT
+    c.id::text AS id,
+    c.chunk_text AS content,
+    (1 - (e.embedding <=> $1::vector)) * 0.7
+    + ts_rank(
+        to_tsvector('simple', c.chunk_text_normalized),
+        plainto_tsquery('simple', $2)
+      ) * 0.3 AS similarity
+  FROM ${TABLE_NAME} c
+  JOIN inquiry_case_ai_chunk_embeddings e
+    ON e.chunk_id = c.id
+    AND e.embedding_model = '${EMBEDDING_MODEL}'
+  WHERE c.chunk_type = 'merged'
+  ORDER BY similarity DESC
+  LIMIT ${TOP_K}
+`;
 
-    const dbResult = await pool.query(searchQuery, [vectorStr]);
+const dbResult = await pool.query(searchQuery, [vectorStr, question]);
     const chunks = dbResult.rows as Array<{
       id: string;
       content: string;
@@ -76,6 +80,8 @@ router.post("/ask", async (req, res) => {
     }>;
 
     req.log.info({ count: chunks.length }, "유사 문서 검색 완료");
+    req.log.info({ scores: chunks.map(c => ({ id: c.id, similarity: c.similarity }))
+    }, "유사도 점수");
 
     const context = chunks
       .map((chunk, i) => `[문서 ${i + 1}]\n${chunk.content}`)
