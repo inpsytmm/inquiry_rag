@@ -21,6 +21,9 @@ const EMBEDDING_COLUMN = "embedding";
 /** 유사도 검색 시 반환할 최대 문서 수 */
 const TOP_K = parseInt(process.env.RAG_TOP_K ?? "5", 10);
 
+/** 유사도 임계값 - 이 값 미만의 청크는 검색 결과에서 제외 */
+const SIMILARITY_THRESHOLD = parseFloat(process.env.RAG_SIMILARITY_THRESHOLD ?? "0.45");
+
 /** OpenAI 임베딩 모델 */
 const EMBEDDING_MODEL = process.env.EMBEDDING_MODEL ?? "text-embedding-3-small";
 
@@ -85,6 +88,7 @@ router.post("/ask", async (req, res) => {
       FROM ${TABLE_NAME} c
       JOIN inquiry_case_ai_chunk_embeddings e ON e.chunk_id = c.id
       WHERE c.chunk_type = 'merged'
+      AND 1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) >= ${SIMILARITY_THRESHOLD}  -- 추가
       ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
       LIMIT ${TOP_K}
     `;
