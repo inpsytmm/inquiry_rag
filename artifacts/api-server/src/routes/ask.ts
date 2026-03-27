@@ -81,17 +81,19 @@ router.post("/ask", async (req, res) => {
     req.log.info("pgvector 유사 문서 검색 시작");
     const vectorStr = `[${questionEmbedding.join(",")}]`;
     const searchQuery = `
-      SELECT
-        c.id::text AS id,
-        c.${TEXT_COLUMN} AS content,
-        1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
-      FROM ${TABLE_NAME} c
-      JOIN inquiry_case_ai_chunk_embeddings e ON e.chunk_id = c.id
-      WHERE c.chunk_type = 'merged'
-      AND 1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) >= ${SIMILARITY_THRESHOLD}  -- 추가
-      ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
-      LIMIT ${TOP_K}
-    `;
+  SELECT
+    c.id::text AS id,
+    c.${TEXT_COLUMN} AS content,
+    1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) AS similarity
+  FROM ${TABLE_NAME} c
+  JOIN inquiry_case_ai_chunk_embeddings e 
+    ON e.chunk_id = c.id
+    AND e.embedding_model = '${EMBEDDING_MODEL}'
+  WHERE c.chunk_type = 'merged'
+    AND 1 - (e.${EMBEDDING_COLUMN} <=> $1::vector) >= ${SIMILARITY_THRESHOLD}
+  ORDER BY e.${EMBEDDING_COLUMN} <=> $1::vector
+  LIMIT ${TOP_K}
+`;
     const dbResult = await pool.query(searchQuery, [vectorStr]);
     const chunks = dbResult.rows as Array<{
       id: string;
