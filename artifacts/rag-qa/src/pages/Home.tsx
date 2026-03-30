@@ -26,6 +26,7 @@ import {
 
 export default function Home() {
   const [question, setQuestion] = useState("");
+  const [submittedQuestion, setSubmittedQuestion] = useState("");
   const [expandedChunks, setExpandedChunks] = useState<Set<string>>(new Set());
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -48,6 +49,7 @@ export default function Home() {
     const trimmed = question.trim();
     setQuestion("");
     setExpandedChunks(new Set());
+    setSubmittedQuestion(trimmed);
     askMutation.mutate({ data: { question: trimmed } });
   };
 
@@ -161,6 +163,18 @@ export default function Home() {
             </form>
           </Card>
         </motion.section>
+
+        {submittedQuestion && (
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 flex justify-end"
+          >
+            <div className="max-w-[80%] rounded-2xl bg-slate-900 px-5 py-3 text-sm leading-6 text-white">
+              {submittedQuestion}
+            </div>
+          </motion.div>
+        )}
 
         <AnimatePresence mode="wait">
           {isPending && (
